@@ -1,0 +1,17 @@
+sbcl --load quicklisp.lisp
+
+(ql:quickload "cl-csv")
+(defparameter data (cl-csv:read-csv #P"results.csv"))
+(defparameter saved-cols
+  (car (cl-csv:read-csv #P"cols.csv")))
+(defparameter header (car data))
+(defun get-col-position (col-name)
+  (position col-name header :test #'string=))
+(defparameter cols-to-keep
+  (mapcar #'get-col-position saved-cols))
+(defun create-output-row (input-row)
+  (loop for x in cols-to-keep
+        collect (nth x input-row)))
+(defparameter output
+  (mapcar #'create-output-row data))
+(cl-csv:write-csv output :stream #P"data.csv")
